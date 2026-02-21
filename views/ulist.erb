@@ -1,0 +1,240 @@
+<div class="container p-3">
+  <p class="d-inline-flex gap-1">
+    <button class="btn btn-outline-success" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFormUser" aria-expanded="false" aria-controls="collapseFormUser">
+      <%= I18n.t('views.create_user_button') %>
+    </button>
+  </p>
+  <div class="collapse" id="collapseFormUser">
+    <div class="card card-body">
+      <form action="/adduser" method="post">
+        <div class="mb-3">
+          <label for="login" class="form-label"><%= I18n.t('views.login_label') %></label>
+          <input type="text" class="form-control" id="login" name="login" required>
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label"><%= I18n.t('views.password_label') %></label>
+          <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label"><%= I18n.t('views.email_label') %></label>
+          <input type="email" class="form-control" id="email" name="email">
+        </div>
+        <div class="mb-3">
+          <label for="role" class="form-label"><%= I18n.t('views.role_label') %></label>
+          <select class="form-select" id="role" name="role">
+            <option value="0" selected><%= I18n.t('views.role_user') %></option>
+            <option value="1"><%= I18n.t('views.role_creator') %></option>
+            <option value="2"><%= I18n.t('views.role_admin') %></option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary"><%= I18n.t('views.submit_create_user') %></button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <ul class="nav nav-pills mb-3" id="userlist-tab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link
+      <% if @tab == 0 %>
+      active
+      <% end %>
+      " id="pills-ulist-tab" data-bs-toggle="pill" data-bs-target="#pills-ulist" type="button" role="tab" aria-controls="pills-ulist"
+      <% if @tab == 0 %>
+      aria-selected="true"
+      <% else %>
+      aria-selected="false"
+      <% end %>
+      >
+        <%= I18n.t('views.user_list_tab') %>
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link
+      <% if @tab == 1 %>
+      active
+      <% end %>
+      " id="pills-edit-tab" data-bs-toggle="pill" data-bs-target="#pills-edit" type="button" role="tab" aria-controls="pills-edit"
+      <% if @tab == 1 %>
+      aria-selected="true"
+      <% else %>
+      aria-selected="false" disabled
+      <% end %>
+      >
+        <%= I18n.t('views.edit_user_tab') %>
+      </button>
+    </li>
+  </ul>
+  <div class="tab-content" id="userlist-tabContent">
+    <div class="tab-pane fade
+    <% if @tab == 0 %>
+    show active
+    <% end %>
+    " id="pills-ulist" role="tabpanel" aria-labelledby="pills-ulist-tab" tabindex="0">
+      <div class="container text-center">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col"><%= I18n.t('views.user_name_header') %></th>
+              <th scope="col"><%= I18n.t('views.role_header') %></th>
+              <th scope="col"><%= I18n.t('views.email_header') %></th>
+              <th scope="col"><%= I18n.t('views.created_at_header') %></th>
+              <th scope="col"><%= I18n.t('views.actions_header') %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @users.each do |user| %>
+              <tr>
+                <td><%= user[:login] %></td>
+                <td>
+                  <%= case user[:role]
+                    when 0 then I18n.t('views.role_user')
+                    when 1 then I18n.t('views.role_creator')
+                    when 2 then I18n.t('views.role_admin')
+                    else I18n.t('views.role_unknown')
+                    end %>
+                </td>
+                <td>
+                  <% if user[:email].nil? || user[:email].strip == '' %>
+                     <%= I18n.t('views.no_email') %>
+                  <% else %>
+                    <%= user[:email] %>
+                  <% end %>
+                </td>
+                <td><%= user[:create_at].strftime('%Y-%m-%d') %></td>
+                <td>
+                  <a href="/edituser/<%= ERB::Util.url_encode(user[:id]) %>" data-bs-toggle="tooltip" data-bs-title="<%= I18n.t('views.edit_user_tab') %>" class="icon-link">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen" viewBox="0 0 16 16">
+                    <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z"/>
+                  </svg>
+                  </a>
+                  <a href="/deleteuser/<%= ERB::Util.url_encode(user[:id]) %>" data-bs-toggle="tooltip" data-bs-title="<%= I18n.t('views.delete_user') %>" class="icon-link revoke-cert">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                    <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                  </svg>
+                  </a>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+        <div class="container text-centered">
+          <nav>
+            <ul class="pagination pagination-sm">
+              <% @pages.each do |item| %>
+              <li class="page-item
+              <% if item[:is_current] %>
+              active
+              <% end %>"
+              >
+                <a class="page-link" aria-current="page" href="/users?p=<%= item[:page] %>">
+                  <%= item[:page] %>
+                </a>
+              </li>
+              <% end %>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+    <div class="tab-pane fade
+    <% if @tab == 1 %>
+    show active
+    <% end %>
+    " id="pills-edit" role="tabpanel" aria-labelledby="pills-edit-tab" tabindex="0">
+      <% if @tab == 1 %>
+        <div class="card">
+          <div class="card-header">
+             <%= I18n.t('views.card_header_edit_user') %>
+          </div>
+          <div class="card-body">
+            <form action="/edituser/<%= @selected_user[:id] %>" method="post" id="editUserForm">
+              <input type="hidden" name="id" value="<%= @selected_user[:id] %>">
+              <div class="mb-3">
+                <label for="login" class="form-label"><%= I18n.t('views.login_label') %></label>
+                <input type="text" class="form-control" id="login" name="login" value="<%= @selected_user[:login] %>" readonly>
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label"><%= I18n.t('views.password_label') %></label>
+                <input type="password" class="form-control" id="password" name="password">
+              </div>
+              <div class="mb-3">
+                <label for="email" class="form-label"><%= I18n.t('views.email_label') %></label>
+                <input type="email" class="form-control" id="email" name="email" value="<%= @selected_user[:email] %>">
+              </div>
+              <div class="mb-3">
+                <label for="role" class="form-label"><%= I18n.t('views.role_label') %></label>
+                <select class="form-select" id="role" name="role">
+                  <% if @selected_user[:role] == 0 %>
+                    <option value="0" selected><%= I18n.t('views.role_user') %></option>
+                  <% else %>
+                    <option value="0"><%= I18n.t('views.role_user') %></option>
+                  <% end %>
+                  <% if @selected_user[:role] == 1 %>
+                    <option value="1" selected><%= I18n.t('views.role_creator') %></option>
+                  <% else %>
+                    <option value="1"><%= I18n.t('views.role_creator') %></option>
+                  <% end %>
+                  <% if @selected_user[:role] == 2 %>
+                    <option value="2" selected><%= I18n.t('views.role_admin') %></option>
+                  <% else %>
+                    <option value="2"><%= I18n.t('views.role_admin') %></option>
+                  <% end %>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary"><%= I18n.t('views.submit_update_user') %></button>
+            </form>
+          </div>
+        </div>
+      <% else %>
+        Nothing
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div id="confirmModal" class="modal fade" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel"><%= I18n.t('views.modal_title_confirm') %></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><%= I18n.t('views.modal_body_confirm') %></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="revokeButton" class="btn btn-danger"><%= I18n.t('views.modal_btn_delete') %></button>
+                <button type="button" id="cancelButton" class="btn btn-secondary" data-bs-dismiss="modal"><%= I18n.t('views.modal_btn_cancel') %></button>
+                <input type="hidden" value="" id="modal-redirect-url"/>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+        $('.revoke-cert').click(function(event) {
+            event.preventDefault(); // Prevent the default action (navigation)
+            var href = $(this).attr('href'); // Get the value of data-href
+            if (href) {
+                $('#modal-redirect-url').val(href);
+                $('#confirmModal').modal('show'); // Show the modal
+            }
+        });
+
+        $('#cancelButton').click(function() {
+            $('#confirmModal').modal('hide'); // Hide the modal when "Cancel" is clicked
+        });
+
+        $('#revokeButton').click(function() {
+            var redirectUrl = $('#modal-redirect-url').val(); // Get the saved URL
+            if (redirectUrl) {
+                window.location.href = redirectUrl; // Redirect to the saved URL
+            }
+        });
+    });
+</script>

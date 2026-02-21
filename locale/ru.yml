@@ -1,0 +1,148 @@
+---
+ru:
+  errors:
+    cannot_determine_root_dir: "Не возможно определить корневую директорию центра сертификации"
+    no_result_file: "Не найден результирующий файл"
+    record_not_found: "Запись с указанным ID не найдена"
+    root_ca_not_detected: "ROOT CA не обнаружена"
+    cannot_get_certificate_info: "Не могу получить информацию о сертификате"
+    command_execution_error: "Ошибка выполнения %{command}"
+    no_permission: У вас нет прав доступа к данному URL
+    authorization_error: "Ошибка авторизации: не могу распознать сессионные данные"
+    token_expired: Токен устарел
+    revocation_missing_id: Отсуствует идентификатор сертификата для отзыва
+    revocation_failed: Отзыв сертификата завершился с ошибкой
+    server_domain_missing: Отсуствует домен сервера
+    client_id_missing: Отсуствует идентификатор клиента
+    validity_days_missing: Не задан срок действия сертификата
+    cert_created_error: Сертификат создан с ошибкой
+    domains_missing: Не задан список доменов для сертификата
+    user_not_found: Пользователь не существует
+    all_fields_required: Все поля обязательны
+    invalid_json: Неверный формат JSON
+    invalid_username_password: Неверное имя пользователя или пароль
+    page_not_found: Страница не найдена
+    argument_error_days: "Дни должны быть числом больше 0"
+    argument_error_domains_ips: "Список доменов и IP-адресов не может быть пустым"
+    argument_error_server_domain: "Домен сервера не может быть пустым"
+    argument_error_client_id: "Идентификатор клиента не может быть пустым"
+    user_already_exists: Пользователь уже существует
+    search_parameters_not_set: Не заданы параметры поиска
+    access_denied: Доступ запрещен
+  pages:
+    servers: Сервера
+    clients: Клиенты
+    revocation: Отзыв сертификата
+    not_found: Страница не найдена
+    users: Пользователи
+    login: Авторизация
+    install_server: Установка сервера сертификатов
+    api: API
+    root: Root
+  messages:
+    install_not_possible: Установка невозможна
+    install_detected:
+      Обнаружены признаки, что установка базы сертификатов уже была
+      произведена ранее или вручную
+    missing_utilities: "Отсутствуют необходимые утилиты: %{missing}"
+    install_success: Установка успешно завершена
+    install_incomplete: Пожалуйста, заполните все обязательные поля.
+    install_failed:
+      Установка провалилась, очистите каталог %{cert_path}, удалите
+      utils/custom_config.h и перезапустите установку.
+    install_success_descr: Перейдите по адресу / и авторизуйтесь
+      как пользователь admin.
+    client_readme: |
+      Сгенерированный набор ключей для установки на клиентскую машину для доступа:
+
+      -   приватный ключ: `%{private_key}`;
+      -   сертификат сервера: `%{server_cert}`;
+      -   цепочка CA: `%{ca_chain}`.
+    server_readme: |
+      Сгенерированный набор ключей для установки на сервер:
+
+      -   приватный ключ: `%{private_key}`;
+      -   сертификат сервера: `%{server_cert}`;
+      -   цепочка CA: `%{ca_chain}`;
+      -   список отмененных сертификатов: `%{crl}`.
+    user_added: Пользователь сохранен
+    user_deleted: Пользователь удален
+  views:
+    enter_password: Введите пароль
+    full_path_info: Информация о полных путях к сертификатам
+    cert_val_day: Число дней действия сертификата
+    authorize: Авторизируйтесь
+    user_name: Имя пользователя
+    enter_login: Введите логин
+    password: Пароль
+    enter_pasword: Введите пароль
+    please_enter_all_required_fields: Пожалуйста, заполните все обязательные поля.
+    certificate_information: Информация о сертификате
+    revoke_information: Информация об отзыве
+    user: Пользователь
+    logout: Выход
+    install_server_title: Завершите установку и настройку сервера сертификации
+    install_server_description: В связи с тем, что не были обнаружены конфигурационные файлы и инициализованная среда, необходимо произвести предварительную настройку
+    cert_path_label: Путь к каталогу, где будет хранится база с сертификатами
+    country_name_label: Код страны
+    org_name_label: Название организации (Organization name)
+    common_name_label: Название подразделения (Common name)
+    cert_password_label: Пароль сертификатов (корневого и промежуточного)
+    enter_cert_path_placeholder: Введите путь к каталогу
+    enter_country_name_placeholder: Введите код страны
+    enter_org_name_placeholder: Введите название организации
+    enter_common_name_placeholder: Введите название подразделения
+    enter_cert_password_placeholder: Введите пароль
+    save: Сохранить
+    create_user_button: Создать пользователя
+    user_list_tab: Список пользователей
+    edit_user_tab: Редактировать пользователя
+    user_name_header: Имя пользователя
+    role_header: Роль
+    email_header: email
+    created_at_header: Дата создания
+    actions_header: Действия
+    card_header_edit_user: Редактировать пользователя
+    login_label: Логин
+    password_label: Пароль
+    email_label: Email
+    role_label: Роль
+    submit_create_user: Создать пользователя
+    submit_update_user: Обновить пользователя
+    modal_title_confirm: Подтвердите действие
+    modal_body_confirm: Вы уверены, что хотите удалить пользователя?
+    modal_body_confirm_revoke: Вы уверены, что хотите отозвать сертификат?
+    modal_btn_delete: Удалить
+    modal_btn_cancel: Отмена
+    no_email: нет
+    role_user: user
+    role_creator: creator
+    role_admin: admin
+    role_unknown: unknown
+    create_request_cert_button: "Запросить новый сертификат"
+    domains_label: "Список доменов и IP через запятую"
+    validity_days_label: "Число дней в течение которых сертификат будет действительным"
+    domains_placeholder: "example.com, 192.168.1.1"
+    request_cert_submit: "Запросить сертификат"
+    request_cert_info: "Вы можете позже скачать сам сертификат и дополнительные сведения на странице списка сертификатов или на странице информации о сертификате. Первое доменное имя будет идентификатором сертификата и должно быть уникальным."
+    server_certs_tab: "Список серверных сертификатов"
+    selected_cert_info_tab: "Информация о выбранном сертификате"
+    status_header: "Статус"
+    id_header: "ID"
+    date_header: "Дата"
+    revoke_date_header: "Дата отзыва"
+    info_header: "Сведения"
+    revoke_cert_tooltip: "отозвать сертификат"
+    download_cert_tooltip: "Скачать сертификат"
+    view_cert_tooltip: "Посмотреть сертификат"
+    view_clients_tooltip: "Посмотреть сертификаты клиентов сервера"
+    cert_info_card_title: "информация о сертификате"
+    revoke_info_card_title: "информация об отзыве"
+    additional_actions: "Дополнительные действия"
+    revoke_button: "Отозвать"
+    server_access_label: "Сервер, к которому будет осуществляться доступ"
+    client_name_email_label: "Имя клиента или его email (он должен быть уникальным)"
+    client_placeholder: "user@user.example"
+    list_clients_tab: "Список клиентских сертификатов"
+    filtered_certs_tab: "Отфильтрованные сертификаты"
+    delete_user: Удалить пользователя

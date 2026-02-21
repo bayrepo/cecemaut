@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= @page_name %></title>
+    <link rel="stylesheet" href="/js/bootstrap.min.css" />
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/jquery-4.0.0.min.js"></script>
+</head>
+
+<body>
+
+    <% if @menu %>
+        <nav class="navbar navbar-expand-lg bg-body-tertiary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="https://brepo.ru">brepo.ru</a>
+                <span class="navbar-text pe-2 me-2 border-end"><%= I18n.t('views.user') %>: <%= session[:user].login %></span>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+                    aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                    <div class="navbar-nav">
+                        <a class="nav-link
+                       <% if @page_name == I18n.t('pages.servers') %>
+                        active
+                       <% end %>" aria-current="page" href="/"><%= I18n.t('pages.servers') %></a>
+                       <a class="nav-link
+                       <% if @page_name == I18n.t('pages.clients') %>
+                        active
+                       <% end %>" aria-current="page" href="/clients"><%= I18n.t('pages.clients') %></a>
+                       <% if hasperms?('admin') %>
+                        <a class="nav-link
+                       <% if @page_name == I18n.t('pages.users') %>
+                          active
+                       <% end %>
+                        " href="/ulist"><%= I18n.t('pages.users') %></a>
+                        <% end %>
+                        <a class="nav-link <%= 'active' if @page_name == I18n.t('pages.api') %>" href="/apiinfo"><%= I18n.t('pages.api') %></a>
+                        <a class="nav-link <%= 'active' if @page_name == I18n.t('pages.root') %>" href="/root"><%= I18n.t('pages.root') %></a>
+                        <a class="nav-link" href="/logout"><%= I18n.t('views.logout') %></a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    <% end %>
+
+    <div class="container pb-5"></div>
+
+    <%= yield %>
+
+    <div class="container pb-5"></div>
+
+    <div class="container-fluid text-center bg-light p-2">
+        Made by BayRepo &copy; 2026
+    </div>
+</body>
+
+</html>

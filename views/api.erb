@@ -1,0 +1,10 @@
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <%= I18n.t('pages.api') %>
+            </div>
+            <div class="card-body">
+                <pre><%= ERB::Util.html_escape(File.read('docs/API.md')) %></pre>
+            </div>
+        </div>
+    </div>

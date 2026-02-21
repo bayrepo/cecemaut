@@ -1,0 +1,23 @@
+<div class="card">
+    <div class="card-header">
+        <%= @cert_info[:name] %>
+    </div>
+    <div class="card-body">
+        <h5 class="card-title"><%= I18n.t('views.certificate_information') %></h5>
+        <div class="card">
+            <div class="card-body overflow-x-auto">
+                <pre>
+<%= @cert_info[:common] %>
+                </pre>
+            </div>
+            </div>
+            <h5 class="card-title"><%= I18n.t('views.revoke_information') %></h5>
+                                <div class="card">
+            <div class="card-body overflow-x-auto">
+                <pre>
+<%= @cert_info[:revoke] %>
+                </pre>
+            </div>
+            </div>
+    </div>
+</div>

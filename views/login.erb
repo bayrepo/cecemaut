@@ -1,0 +1,51 @@
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <%= I18n.t('views.authorize') %>
+            </div>
+            <div class="card-body">
+                <% unless @error.nil? %>
+                <div class="alert alert-danger" role="alert"><%= @error %></div>
+                <% end %>
+                <div class="container">
+                    <form id="login-form" action="/login" method="POST" class="d-flex flex-column align-items-center">
+                        <div class="mb-3 w-100">
+                            <label for="login" class="form-label"><%= I18n.t('views.user_name') %></label>
+                            <input type="text" class="form-control w-100 required" id="login" name="login"
+                                placeholder="<%= I18n.t('views.enter_login') %>">
+                        </div>
+                        <div class="mb-3 w-100">
+                            <label for="password" class="form-label"><%= I18n.t('views.password') %></label>
+                            <input type="password" class="form-control w-100 required" id="password" name="password"
+                                placeholder="<%= I18n.t('views.enter_password') %>">
+                        </div>
+                        <div class="d-flex justify-content-center w-100">
+                        <button type="button" class="btn btn-primary" id="submit-btn"><%= I18n.t('views.authorize') %></button>
+                        </div>
+                    </form>
+
+                    <script>
+                        $(document).ready(function () {
+                            $('#submit-btn').click(function () {
+                                var isValid = true;
+                                $('.required').each(function() {
+                                    if ($(this).val() === '') {
+                                        isValid = false;
+                                        $(this).addClass('is-invalid');
+                                    } else {
+                                        $(this).removeClass('is-invalid');
+                                    }
+                                });
+
+                                if (isValid) {
+                                    $('#login-form').submit();
+                                } else {
+                                    alert('<%= I18n.t('views.please_enter_all_required_fields') %>');
+                                }
+                            });
+                        });
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>

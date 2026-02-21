@@ -1,0 +1,143 @@
+---
+en:
+  errors:
+    cannot_determine_root_dir: "Unable to determine root directory of the certificate center"
+    no_result_file: "Result file not found"
+    record_not_found: "Record with the specified ID not found"
+    root_ca_not_detected: "ROOT CA not detected"
+    cannot_get_certificate_info: "Unable to get certificate information"
+    command_execution_error: "Command execution error: %{command}"
+    argument_error_days: "Days must be a number greater than 0"
+    argument_error_domains_ips: "Domains and IPs list cannot be empty"
+    argument_error_server_domain: "Server domain cannot be empty"
+    argument_error_client_id: "Client ID cannot be empty"
+    no_permission: You do not have access rights to the given URL
+    authorization_error: "Authorization error: cannot recognize session data"
+    token_expired: Token has expired
+    revocation_missing_id: Missing certificate ID for revocation
+    revocation_failed: Certificate revocation finished with error
+    server_domain_missing: Missing server domain
+    client_id_missing: Missing client identifier
+    validity_days_missing: Validity period not set
+    cert_created_error: Certificate creation failed
+    domains_missing: Missing domain list for certificate
+    user_not_found: User does not exist
+    all_fields_required: All fields are required
+    invalid_json: Invalid JSON format
+    invalid_username_password: Invalid username or password
+    page_not_found: Page not found
+    user_already_exists: User already exists
+    search_parameters_not_set: Search parameters not set
+    access_denied: Access denied
+  pages:
+    servers: Servers
+    clients: Clients
+    revocation: Revocation
+    not_found: Page not found
+    users: Users
+    login: Login
+    install_server: Install Server
+    api: API
+    root: Root
+  messages:
+    install_not_possible: Installation impossible
+    install_detected: Installation already performed or manually detected
+    missing_utilities: "Missing required utilities: %{missing}"
+    install_success: Installation completed successfully
+    install_incomplete: Please fill all required fields.
+    install_failed: Installation failed, clear the directory %{cert_path}, delete utils/custom_config.h and restart the installation.
+    install_success_descr: Go to / and log in as admin.
+    client_readme: |
+      Generated set of keys for installing on client machine for access:
+
+      -   private key: `%{private_key}`;
+      -   server certificate: `%{server_cert}`;
+      -   CA chain: `%{ca_chain}`.
+    server_readme: |
+      Generated set of keys for installing on server:
+
+      -   private key: `%{private_key}`;
+      -   server certificate: `%{server_cert}`;
+      -   CA chain: `%{ca_chain}`;
+      -   revoked certificates list: `%{crl}`.
+    user_added: User saved
+    user_deleted: User deleted
+  views:
+    enter_password: Enter password
+    full_path_info: Certificate full path information
+    cert_val_day: Number of days the certificate will be valid
+    authorize: Login
+    user_name: Username
+    enter_login: Enter login
+    password: Password
+    enter_pasword: Enter password
+    please_enter_all_required_fields: Please fill in all required fields.
+    certificate_information: Certificate information
+    revoke_information: Revocation information
+    user: User
+    logout: Logout
+    install_server_title: Complete the installation and configuration of the certification server
+    install_server_description: In case configuration files and initialized environment were not found, you need to perform a preliminary setup
+    cert_path_label: Path to the directory where the certificate database will be stored
+    country_name_label: Country code
+    org_name_label: Organization name (Organization name)
+    common_name_label: Division name (Common name)
+    cert_password_label: Certificate password (root and intermediate)
+    enter_cert_path_placeholder: Enter the directory path
+    enter_country_name_placeholder: Enter country code
+    enter_org_name_placeholder: Enter organization name
+    enter_common_name_placeholder: Enter division name
+    enter_cert_password_placeholder: Enter password
+    save: Save
+    create_user_button: Create user
+    user_list_tab: User list
+    edit_user_tab: Edit user
+    user_name_header: Username
+    role_header: Role
+    email_header: Email
+    created_at_header: Creation date
+    actions_header: Actions
+    card_header_edit_user: Edit user
+    login_label: Login
+    password_label: Password
+    email_label: Email
+    role_label: Role
+    submit_create_user: Create user
+    submit_update_user: Update user
+    modal_title_confirm: Confirm action
+    modal_body_confirm: Are you shure you want to delete user?
+    modal_body_confirm_revoke: Are you sure you want to revoke the certificate?
+    modal_btn_delete: Delete
+    modal_btn_cancel: Cancel
+    no_email: None
+    role_user: user
+    role_creator: creator
+    role_admin: admin
+    role_unknown: unknown
+    create_request_cert_button: Request new certificate
+    domains_label: Domains and IPs separated by commas
+    validity_days_label: Number of days the certificate will be valid
+    domains_placeholder: example.com, 192.168.1.1
+    request_cert_submit: Request certificate
+    request_cert_info: You can later download the certificate and additional information on the certificate list page or on the certificate information page. The first domain name will be the certificate identifier and must be unique.
+    server_certs_tab: Server certificates list
+    selected_cert_info_tab: Selected certificate information
+    status_header: Status
+    id_header: ID
+    date_header: Date
+    revoke_date_header: Revocation date
+    info_header: Info
+    revoke_cert_tooltip: Revoke certificate
+    download_cert_tooltip: Download certificate
+    view_cert_tooltip: View certificate
+    view_clients_tooltip: View client certificates for server
+    cert_info_card_title: Certificate information
+    revoke_info_card_title: Revocation information
+    additional_actions: Additional actions
+    revoke_button: Revoke
+    server_access_label: Server to which access will be granted
+    client_name_email_label: Client name or its email (must be unique)
+    client_placeholder: user@user.example
+    list_clients_tab: Client certificates list
+    filtered_certs_tab: Filtered certificates
+    delete_user: Delete user

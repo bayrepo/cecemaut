@@ -1,0 +1,10 @@
+vendor
+db/*.sqlite
+.ruby-lsp
+logs/actions.log
+utils/custom_config.sh
+classes/config_custom.rb
+Steepfile
+caapp.private.key.pem
+caapp.public.key.pem
+!.gitignore

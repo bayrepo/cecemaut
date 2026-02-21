@@ -1,0 +1,6 @@
+<div class="card text-white mb-3 p-3">
+  <div class="card-header bg-danger text-center"><%= ERB::Util.html_escape(@error) %></div>
+  <div class="card-body text-black">
+    <pre><%= ERB::Util.html_escape(@log) %></pre>
+  </div>
+</div>

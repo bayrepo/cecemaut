@@ -1,0 +1,381 @@
+<% if hasperms?('creator') %>
+  <div class="container p-3">
+    <p class="d-inline-flex gap-1">
+      <button class="btn btn-outline-warning" type="button" data-bs-toggle="collapse" data-bs-target="#collapseForm" aria-expanded="false" aria-controls="collapseForm">
+        <%= I18n.t('views.create_request_cert_button') %>
+      </button>
+    </p>
+    <div class="collapse" id="collapseForm">
+      <div class="card card-body">
+      <form action="/addclient" method="post">
+        <div class="mb-3">
+          <label for="server_domain" class="form-label"><%= I18n.t('views.server_access_label') %></label>
+          <select class="form-select" aria-label="<%= I18n.t('views.server_access_label') %>" id="server_domain" name="server_domain" required>
+          <% fst = true %>
+          <% @list_servers_full.each do |item| %>
+            <% if fst == true %>
+              <% fst = false %>
+              <option value="<%= item %>"selected><%= item %></option>
+            <% else %>
+              <option value="<%= item %>"><%= item %></option>
+            <% end %>
+          <% end %>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="client" class="form-label"><%= I18n.t('views.client_name_email_label') %></label>
+          <input type="text" class="form-control" id="client" name="client" required placeholder="<%= I18n.t('views.client_placeholder') %>">
+        </div>
+        <div class="mb-3">
+          <label for="validityDays" class="form-label"><%= I18n.t('views.validity_days_label') %></label>
+          <input type="number" class="form-control" id="validityDays" name="validity_days" required value="365">
+        </div>
+        <button type="submit" class="btn btn-primary"><%= I18n.t('views.request_cert_submit') %></button>
+        <p class="mt-2"><%= I18n.t('views.request_cert_info') %></p>
+      </form>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+    <div class="container">
+        <ul class="nav nav-pills mb-3" id="liclist-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link
+                <% if @tab == 0 %>
+                active
+                <% end %>
+                " id="pills-slist-tab" data-bs-toggle="pill" data-bs-target="#pills-slist"
+                    type="button" role="tab" aria-controls="pills-slist"
+                   <% if @tab == 0 %>
+                    aria-selected="true"
+                    <% else %>
+                    aria-selected="false"
+                    <% end %>
+                    >
+                    <%= I18n.t('views.list_clients_tab') %>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link
+                <% if @tab == 1 %>
+                active
+                <% end %>
+                " id="pills-clist-tab" data-bs-toggle="pill" data-bs-target="#pills-clist"
+                    type="button" role="tab" aria-controls="pills-clist"
+                    <% if @tab == 1 %>
+                    aria-selected="true"
+                    <% else %>
+                    aria-selected="false" disabled
+                    <% end %>
+                    >
+                    <%= I18n.t('views.filtered_certs_tab') %>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link
+                <% if @tab == 2 %>
+                active
+                <% end %>
+                " id="pills-ilist-tab" data-bs-toggle="pill" data-bs-target="#pills-ilist"
+                    type="button" role="tab" aria-controls="pills-ilist"
+                    <% if @tab == 2 %>
+                    aria-selected="true"
+                    <% else %>
+                    aria-selected="false" disabled
+                    <% end %>
+                    >
+                    <%= I18n.t('views.selected_cert_info_tab') %>
+                </button>
+            </li>
+        </ul>
+        <div class="tab-content" id="liclist-tabContent">
+            <div class="tab-pane fade
+            <% if @tab == 0 %>
+            show active
+            <% end %>
+            " id="pills-slist" role="tabpanel" aria-labelledby="pills-slist-tab"
+                tabindex="0">
+                <div class="container text-center">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col"><%= I18n.t('views.status_header') %></th>
+                                <th scope="col"><%= I18n.t('views.id_header') %></th>
+                                <th scope="col"><%= I18n.t('views.date_header') %></th>
+                                <th scope="col"><%= I18n.t('views.revoke_date_header') %></th>
+                                <th scope="col"><%= I18n.t('views.info_header') %></th>
+                                <th scope="col"><%= I18n.t('views.actions_header') %></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <% @list_clients.each do |item| %>
+                            <tr
+                            <% if item[:status] != 'V' %>
+                            class="table-danger"
+                            <% elsif item[:expired] %>
+                            class="table-warning"
+                            <% end %>
+                            >
+                                <td><%= item[:status] %></td>
+                                <td><%= item[:id] %></td>
+                                <td><%= item[:date] %></td>
+                                <td><%= item[:revoke_date] %></td>
+                                <td>CN=<%= item[:ui][:CN] %>, O=<%= item[:ui][:O] %></td>
+                                <td>
+                                <% if hasperms?('creator') %>
+                                    <a href="/revoke/<%= ERB::Util.url_encode(item[:id]) %>" data-bs-toggle="tooltip" data-bs-title="<%= I18n.t('views.revoke_cert_tooltip') %>" class="icon-link revoke-cert">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            fill="currentColor" class="bi bi-sign-stop" viewBox="0 0 16 16">
+                                            <path
+                                                d="M3.16 10.08c-.931 0-1.447-.493-1.494-1.132h.653c.065.346.396.583.891.583.524 0 .83-.246.83-.62 0-.303-.203-.467-.637-.572l-.656-.164c-.61-.147-.978-.51-.978-1.078 0-.706.597-1.184 1.444-1.184.853 0 1.386.475 1.436 1.087h-.645c-.064-.32-.352-.542-.797-.542-.472 0-.77.246-.77.6 0 .261.196.437.553.522l.654.161c.673.164 1.06.487 1.06 1.11 0 .736-.574 1.228-1.544 1.228Zm3.427-3.51V10h-.665V6.57H4.753V6h3.006v.568H6.587Z" />
+                                            <path fill-rule="evenodd"
+                                                d="M11.045 7.73v.544c0 1.131-.636 1.805-1.661 1.805-1.026 0-1.664-.674-1.664-1.805V7.73c0-1.136.638-1.807 1.664-1.807s1.66.674 1.66 1.807Zm-.674.547v-.553c0-.827-.422-1.234-.987-1.234-.572 0-.99.407-.99 1.234v.553c0 .83.418 1.237.99 1.237.565 0 .987-.408.987-1.237m1.15-2.276h1.535c.82 0 1.316.55 1.316 1.292 0 .747-.501 1.289-1.321 1.289h-.865V10h-.665zm1.436 2.036c.463 0 .735-.272.735-.744s-.272-.741-.735-.741h-.774v1.485z" />
+                                            <path fill-rule="evenodd"
+                                                d="M4.893 0a.5.5 0 0 0-.353.146L.146 4.54A.5.5 0 0 0 0 4.893v6.214a.5.5 0 0 0 .146.353l4.394 4.394a.5.5 0 0 0 .353.146h6.214a.5.5 0 0 0 .353-.146l4.394-4.394a.5.5 0 0 0 .146-.353V4.893a.5.5 0 0 0-.146-.353L11.46.146A.5.5 0 0 0 11.107 0zM1 5.1 5.1 1h5.8L15 5.1v5.8L10.9 15H5.1L1 10.9z" />
+                                        </svg>
+                                    </a>
+                                    <a href="/download/<%= ERB::Util.url_encode(item[:id]) %>" data-bs-toggle="tooltip" data-bs-title="<%= I18n.t('views.download_cert_tooltip') %>" class="icon-link">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-arrow-down" viewBox="0 0 16 16">
+                                        <path d="M8.5 6.5a.5.5 0 0 0-1 0v3.793L6.354 9.146a.5.5 0 1 0-.708.708l2 2a.5.5 0 0 0 .708 0l2-2a.5.5 0 0 0-.708-.708L8.5 10.293z"/>
+                                        <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
+                                        </svg>
+                                    </a>
+                                <% end %>
+                                    <a href="/showc/<%= ERB::Util.url_encode(item[:id]) %>" data-bs-toggle="tooltip" data-bs-title="<%= I18n.t('views.view_cert_tooltip') %>" class="icon-link">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                                            <path
+                                                d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z" />
+                                            <path
+                                                d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0" />
+                                        </svg>
+                                    </a>
+                                    <a href="/clients/<%= ERB::Util.url_encode(item[:id]) %>" data-bs-toggle="tooltip" data-bs-title="<%= I18n.t('views.view_clients_tooltip') %>" class="icon-link">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-funnel" viewBox="0 0 16 16">
+                                        <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5zm1 .5v1.308l4.372 4.858A.5.5 0 0 1 7 8.5v5.306l2-.666V8.5a.5.5 0 0 1 .128-.334L13.5 3.308V2z"/>
+                                        </svg>
+                                    </a>
+                                </td>
+                            </tr>
+                        <% end %>
+                        </tbody>
+                    </table>
+                    <div class="container text-centered">
+                        <nav>
+                            <ul class="pagination pagination-sm">
+                                <% @pages.each do |item| %>
+                                <li class="page-item
+                               <% if item[:is_current] %>
+                                active
+                               <% end %>
+                                ">
+                                    <a class="page-link" aria-current="page"
+                                    <% unless item[:is_current] %>
+                                        href="/clients?p=<%= item[:page] %>"
+                                    <% end %>><%= item[:page] %></a>
+                                </li>
+                                <% end %>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade
+            <% if @tab == 1 %>
+            show active
+            <% end %>
+            " id="pills-clist" role="tabpanel" aria-labelledby="pills-clist-tab" tabindex="0">
+            <% if @tab == 1 %>
+                <div class="container text-center">
+                    <p><%= @server_name %>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col"><%= I18n.t('views.status_header') %></th>
+                                <th scope="col"><%= I18n.t('views.id_header') %></th>
+                                <th scope="col"><%= I18n.t('views.date_header') %></th>
+                                <th scope="col"><%= I18n.t('views.revoke_date_header') %></th>
+                                <th scope="col"><%= I18n.t('views.info_header') %></th>
+                                <th scope="col"><%= I18n.t('views.actions_header') %></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <% @list_clients_short.each do |item| %>
+                            <tr
+                            <% if item[:status] != 'V' %>
+                            class="table-danger"
+                            <% elsif item[:expired] %>
+                            class="table-warning"
+                            <% end %>
+                            >
+                                <td><%= item[:status] %></td>
+                                <td><%= item[:id] %></td>
+                                <td><%= item[:date] %></td>
+                                <td><%= item[:revoke_date] %></td>
+                                <td>CN=<%= item[:ui][:CN] %>, O=<%= item[:ui][:O] %></td>
+                                <td>
+                                <% if hasperms?('creator') %>
+                                    <a href="/revoke/<%= ERB::Util.url_encode(item[:id]) %>" data-bs-toggle="tooltip" data-bs-title="<%= I18n.t('views.revoke_cert_tooltip') %>" class="icon-link revoke-cert">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            fill="currentColor" class="bi bi-sign-stop" viewBox="0 0 16 16">
+                                            <path
+                                                d="M3.16 10.08c-.931 0-1.447-.493-1.494-1.132h.653c.065.346.396.583.891.583.524 0 .83-.246.83-.62 0-.303-.203-.467-.637-.572l-.656-.164c-.61-.147-.978-.51-.978-1.078 0-.706.597-1.184 1.444-1.184.853 0 1.386.475 1.436 1.087h-.645c-.064-.32-.352-.542-.797-.542-.472 0-.77.246-.77.6 0 .261.196.437.553.522l.654.161c.673.164 1.06.487 1.06 1.11 0 .736-.574 1.228-1.544 1.228Zm3.427-3.51V10h-.665V6.57H4.753V6h3.006v.568H6.587Z" />
+                                            <path fill-rule="evenodd"
+                                                d="M11.045 7.73v.544c0 1.131-.636 1.805-1.661 1.805-1.026 0-1.664-.674-1.664-1.805V7.73c0-1.136.638-1.807 1.664-1.807s1.66.674 1.66 1.807Zm-.674.547v-.553c0-.827-.422-1.234-.987-1.234-.572 0-.99.407-.99 1.234v.553c0 .83.418 1.237.99 1.237.565 0 .987-.408.987-1.237m1.15-2.276h1.535c.82 0 1.316.55 1.316 1.292 0 .747-.501 1.289-1.321 1.289h-.865V10h-.665zm1.436 2.036c.463 0 .735-.272.735-.744s-.272-.741-.735-.741h-.774v1.485z" />
+                                            <path fill-rule="evenodd"
+                                                d="M4.893 0a.5.5 0 0 0-.353.146L.146 4.54A.5.5 0 0 0 0 4.893v6.214a.5.5 0 0 0 .146.353l4.394 4.394a.5.5 0 0 0 .353.146h6.214a.5.5 0 0 0 .353-.146l4.394-4.394a.5.5 0 0 0 .146-.353V4.893a.5.5 0 0 0-.146-.353L11.46.146A.5.5 0 0 0 11.107 0zM1 5.1 5.1 1h5.8L15 5.1v5.8L10.9 15H5.1L1 10.9z" />
+                                        </svg>
+                                    </a>
+                                    <a href="/download/<%= ERB::Util.url_encode(item[:id]) %>" data-bs-toggle="tooltip" data-bs-title="<%= I18n.t('views.download_cert_tooltip') %>" class="icon-link">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-arrow-down" viewBox="0 0 16 16">
+                                        <path d="M8.5 6.5a.5.5 0 0 0-1 0v3.793L6.354 9.146a.5.5 0 1 0-.708.708l2 2a.5.5 0 0 0 .708 0l2-2a.5.5 0 0 0-.708-.708L8.5 10.293z"/>
+                                        <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
+                                        </svg>
+                                    </a>
+                                <% end %>
+                                    <a href="/showc/<%= ERB::Util.url_encode(item[:id]) %>" data-bs-toggle="tooltip" data-bs-title="<%= I18n.t('views.view_cert_tooltip') %>" class="icon-link">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                                            <path
+                                                d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z" />
+                                            <path
+                                                d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0" />
+                                        </svg>
+                                    </a>
+                                    <a href="/clients/<%= ERB::Util.url_encode(item[:id]) %>" data-bs-toggle="tooltip" data-bs-title="<%= I18n.t('views.view_clients_tooltip') %>" class="icon-link">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-funnel" viewBox="0 0 16 16">
+                                        <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5zm1 .5v1.308l4.372 4.858A.5.5 0 0 1 7 8.5v5.306l2-.666V8.5a.5.5 0 0 1 .128-.334L13.5 3.308V2z"/>
+                                        </svg>
+                                    </a>
+                                </td>
+                            </tr>
+                        <% end %>
+                        </tbody>
+                    </table>
+                    <div class="container text-centered">
+                        <nav>
+                            <ul class="pagination pagination-sm">
+                                <% @pages_short.each do |item| %>
+                                <li class="page-item
+                               <% if item[:is_current] %>
+                                active
+                               <% end %>
+                                ">
+                                    <a class="page-link" aria-current="page"
+                                    <% unless item[:is_current] %>
+                                      href="/clients/<%= @id %>?fp=<%= item[:page] %>"
+                                    <% end %>><%= item[:page] %></a>
+                                </li>
+                                <% end %>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            <% else %>
+                Nothing
+            <% end %>
+            </div>
+            <div class="tab-pane fade
+            <% if @tab == 2 %>
+            show active
+            <% end %>
+            " id="pills-ilist" role="tabpanel" aria-labelledby="pills-ilist-tab" tabindex="0">
+            <% if @tab == 2 %>
+                <div class="card">
+                    <div class="card-header">
+                        <%= @cert_info[:name] %> id: <%= @cert_info[:id] %>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title"><%= I18n.t('views.cert_info_card_title') %></h5>
+                        <div class="card">
+                            <div class="card-body overflow-x-auto">
+                                <pre>
+<%= @cert_info[:common] %>
+                                </pre>
+                            </div>
+                            </div>
+                            <h5 class="card-title"><%= I18n.t('views.revoke_info_card_title') %></h5>
+                        <div class="card">
+                            <div class="card-body overflow-x-auto">
+                                <pre>
+<%= @cert_info[:revoke] %>
+                                </pre>
+                            </div>
+                            </div>
+                            <% if hasperms?('creator') %>
+                            <h5 class="card-title"><%= I18n.t('views.additional_actions') %></h5>
+                            <div class="card">
+                            <div class="card-body overflow-x-auto">
+                            <p><%= I18n.t('views.download_cert_tooltip') %>
+                            <a href="/download/<%= ERB::Util.url_encode(@cert_info[:id]) %>" data-bs-toggle="tooltip" data-bs-title="<%= I18n.t('views.download_cert_tooltip') %>" class="icon-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-arrow-down" viewBox="0 0 16 16">
+                                <path d="M8.5 6.5a.5.5 0 0 0-1 0v3.793L6.354 9.146a.5.5 0 1 0-.708.708l2 2a.5.5 0 0 0 .708 0l2-2a.5.5 0 0 0-.708-.708L8.5 10.293z"/>
+                                <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
+                                </svg>
+                            </a>
+                            </p>
+                            </div>
+                            </div>
+                            <% end %>
+                            <h5 class="card-title"><%= I18n.t('views.full_path_info') %></h5>
+                            <div class="card">
+                            <div class="card-body overflow-x-auto">
+                            <pre>
+                                <%= @cert_info[:full] %>
+                            </pre>
+                            </div>
+                            </div>
+                    </div>
+                </div>
+            <% else %>
+                Nothing
+            <% end %>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal fade" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmModalLabel"><%= I18n.t('views.modal_title_confirm') %></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><%= I18n.t('views.modal_body_confirm_revoke') %></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="revokeButton" class="btn btn-danger"><%= I18n.t('views.revoke_button') %></button>
+                    <button type="button" id="cancelButton" class="btn btn-secondary" data-bs-dismiss="modal"><%= I18n.t('views.modal_btn_cancel') %></button>
+                    <input type="hidden" value="" id="modal-redirect-url"/>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+            $('.revoke-cert').click(function(event) {
+                event.preventDefault(); // Prevent the default action (navigation)
+                var href = $(this).attr('href'); // Get the value of data-href
+                if (href) {
+                    $('#modal-redirect-url').val(href);
+                    $('#confirmModal').modal('show'); // Show the modal
+                }
+            });
+
+            $('#cancelButton').click(function() {
+                $('#confirmModal').modal('hide'); // Hide the modal when "Cancel" is clicked
+            });
+
+            $('#revokeButton').click(function() {
+                var redirectUrl = $('#modal-redirect-url').val(); // Get the saved URL
+                if (redirectUrl) {
+                    window.location.href = redirectUrl; // Redirect to the saved URL
+                }
+            });
+        });
+    </script>
