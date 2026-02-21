@@ -51,7 +51,7 @@ fi
 cd "$PATH_TO_CA" || { msg "Error: Failed to change directory to $PATH_TO_CA" "Ошибка: Не удалось перейти в каталог $PATH_TO_CA"; }
 
 # Список каталогов, для которых создается структура
-DIRECTORIES=("root" "intermediate")
+DIRECTORIES=("root")
 
 # Создание необходимых директорий и настройка их прав доступа
 for dir in "${DIRECTORIES[@]}"; do
@@ -114,7 +114,7 @@ prompt              = no
 [req_distinguished_name]
 countryName                     = $COUNTRY_NAME
 organizationName                = $ORG_NAME
-commonName                      = $ORG_NAME
+commonName                      = $COMM_NAME
 
 [v3_ca]
 subjectKeyIdentifier = hash
@@ -152,128 +152,5 @@ openssl x509 -noout -text -in certs/ca.cert.pem || { msg "Error: Failed to displ
 
 # Вернуться в исходную директорию или выйти с ошибкой, если это не удалось
 popd || { msg "Can't return to old directory" "Невозможно вернуться к старому каталогу"; }
-
-# Создание конфигурационного файла для промежуточного ЦА
-cat >intermediate/immissuer.conf <<EOL
-[ca]
-default_ca=CA_default
-
-[CA_default]
-dir               = $IMM_CA
-certs             = \$dir/certs
-crl_dir           = \$dir/crl
-database          = \$dir/index.txt
-new_certs_dir     = \$dir/newcerts
-serial            = \$dir/serial
-
-certificate       = \$dir/certs/intermediate.cert.pem
-private_key       = \$dir/private/intermediate.key.pem
-crlnumber         = \$dir/crlnumber
-crl               = \$dir/crl/intermediate.crl.pem
-crl_extensions    = crl_ext
-default_crl_days  = 7
-
-default_md        = sha256
-name_opt          = ca_default
-cert_opt          = ca_default
-default_days      = 825
-preserve          = no
-policy            = policy_loose
-
-[policy_loose]
-countryName             = optional
-stateOrProvinceName     = optional
-localityName            = optional
-organizationName        = optional
-organizationalUnitName  = optional
-commonName              = supplied
-emailAddress            = optional
-
-[req]
-default_bits        = 4096
-default_md          = sha256
-default_keyfile     = privkey.pem
-distinguished_name  = req_distinguished_name
-string_mask         = utf8only
-x509_extensions     = v3_intermediate_ca
-prompt              = no
-
-[req_distinguished_name]
-countryName                     = $COUNTRY_NAME
-organizationName                = $ORG_NAME
-commonName                      = $ORG_NAME
-
-[v3_intermediate_ca]
-subjectKeyIdentifier = hash
-authorityKeyIdentifier = keyid:always,issuer
-basicConstraints = critical, CA:true, pathlen:0
-keyUsage = critical, keyCertSign, cRLSign
-
-[server_cert]
-basicConstraints = CA:false
-nsCertType = server
-nsComment = "$COMM_NAME TLS server cert"
-subjectKeyIdentifier = hash
-authorityKeyIdentifier = keyid,issuer
-keyUsage = critical, digitalSignature, keyEncipherment
-extendedKeyUsage = serverAuth
-
-[client_cert]
-basicConstraints = CA:false
-nsCertType = client
-nsComment = "Brepo client cert"
-subjectKeyIdentifier = hash
-authorityKeyIdentifier = keyid,issuer
-keyUsage = critical, digitalSignature, keyEncipherment
-extendedKeyUsage = clientAuth
-
-[crl_ext]
-authorityKeyIdentifier = keyid:always
-EOL
-
-# Перейти в директорию промежуточного ЦА или выйти с ошибкой, если это не удалось
-pushd "$IMM_CA" || { msg "Error: Failed to change directory to $IMM_CA" "Ошибка: Не удалось перейти в каталог $IMM_CA"; }
-
-# Генерация RSA ключа для промежуточного ЦА с шифрованием AES-256
-openssl genrsa -aes256 -out private/intermediate.key.pem -passout "pass:$SERT_PASS" 4096 || { msg "Error: Failed to generate RSA key for intermediate CA" "Ошибка: Не удалось создать RSA‑ключ для промежуточного ЦА"; }
-
-# Установка прав доступа для ключа промежуточного ЦА
-chmod 400 private/intermediate.key.pem
-
-# Создание CSR для промежуточного ЦА
-openssl req -config immissuer.conf -new -sha256 -key private/intermediate.key.pem -out csr/intermediate.csr.pem -passin "pass:$SERT_PASS" || { msg "Error: Failed to create CSR for intermediate CA" "Ошибка: Не удалось создать запрос на сертификат для промежуточного ЦА"; }
-
-# Вернуться в исходную директорию или выйти с ошибкой, если это не удалось
-popd || { msg "Can't return to old directory" "Невозможно вернуться к старому каталогу"; }
-
-# Перейти в директорию корневого ЦА или выйти с ошибкой, если это не удалось
-pushd "$ROOT_CA" || { msg "Error: Failed to change directory to $ROOT_CA" "Ошибка: Не удалось перейти в каталог $ROOT_CA"; }
-
-# Подпись сертификата промежуточного ЦА корневым ЦА
-openssl ca -batch -config sertissuer.conf -extensions v3_inter -days 3550 -notext -md sha256 -in $IMM_CA/csr/intermediate.csr.pem -out $IMM_CA/certs/intermediate.cert.pem -passin "pass:$SERT_PASS" || { msg "Error: Failed to sign intermediate CA certificate" "Ошибка: Не удалось подписать сертификат промежуточного ЦА корневым ЦА"; }
-
-# Установка прав доступа для сертификата промежуточного ЦА
-chmod 444 $IMM_CA/certs/intermediate.cert.pem
-
-openssl ca -config "sertissuer.conf" -gencrl -out crl/ca.crl.pem -passin "pass:$SERT_PASS"
-
-# Вернуться в исходную директорию или выйти с ошибкой, если это не удалось
-popd || { msg "Can't return to old directory" "Невозможно вернуться к старому каталогу"; }
-
-# Перейти в директорию промежуточного ЦА или выйти с ошибкой, если это не удалось
-pushd "$IMM_CA" || { msg "Error: Failed to change directory to $IMM_CA" "Ошибка: Не удалось перейти в каталог $IMM_CA"; }
-
-openssl ca -config "immissuer.conf" -gencrl -out crl/intermediate.crl.pem -passin "pass:$SERT_PASS"
-
-cat $ROOT_CA/crl/ca.crl.pem $IMM_CA/crl/intermediate.crl.pem >$IMM_CA/crl/ca-full.crl.pem
-
-# Вернуться в исходную директорию или выйти с ошибкой, если это не удалось
-popd || { msg "Can't return to old directory" "Невозможно вернуться к старому каталогу"; }
-
-# Создание цепочки сертификатов
-cat "$IMM_CA/certs/intermediate.cert.pem" "$ROOT_CA/certs/ca.cert.pem" >"$IMM_CA/certs/ca-chain.cert.pem" || { msg "Error: Failed to create CA chain certificate" "Ошибка: Не удалось создать цепочку сертификатов ЦА"; }
-
-# Проверка сертификата промежуточного ЦА с использованием корневого центра сертификации
-openssl verify -CAfile $ROOT_CA/certs/ca.cert.pem $IMM_CA/certs/intermediate.cert.pem || { msg "Error: Failed to verify intermediate CA certificate" "Ошибка: Не удалось проверить сертификат промежуточного ЦА"; }
 
 exit 0

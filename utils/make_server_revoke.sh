@@ -52,6 +52,8 @@ if [ ! -e "$PATH_TO_CA/server_certs/$server" ]; then
     exit 1
 fi
 
+IMM_CA="$PATH_TO_CA/$server"
+
 pushd "$IMM_CA" || {
     msg "Error: Could not change directory to $IMM_CA" "Ошибка: Не удалось перейти в каталог $IMM_CA" >&2
     cd "$CURRENT_DIR" || exit 1

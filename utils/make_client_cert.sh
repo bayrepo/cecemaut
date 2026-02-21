@@ -64,6 +64,8 @@ pushd $PATH_TO_CA || {
     exit 1
 }
 
+IMM_CA="$PATH_TO_CA/$server"
+
 mkdir -p client_certs
 
 pushd client_certs || {

@@ -58,6 +58,8 @@ if [ ! -e "$CLI_CA/$server/${client}_csr_req.cnf" ]; then
     exit 1
 fi
 
+IMM_CA="$PATH_TO_CA/$server"
+
 pushd "$IMM_CA" || {
     msg "Ошибка: не удалось перейти в каталог $IMM_CA" "Error: Could not change directory to $IMM_CA" >&2
     cd "$CURRENT_DIR" || exit 1

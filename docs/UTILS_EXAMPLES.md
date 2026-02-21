@@ -19,7 +19,7 @@
 ### Примеры использования:
 1. Генерация серверного сертификата для домена `example1.com` и IP-адреса `192.168.3.145`:
     ```sh
-    bash make_server_cert.sh example1.com 192.168.3.145
+    bash make_server_cert.sh -t 395 example1.com 192.168.3.145
     ```
 
 ## Утилита `make_client_cert.sh`
@@ -39,7 +39,7 @@
 ### Примеры использования:
 1. Отозвать серверный сертификат для домена `brepo.ru`:
     ```sh
-    bash make_server_revoke.sh -n 1 brepo.ru
+    bash make_server_revoke.sh -n 1 -s brepo.ru
     ```
 
 ## Утилита `make_client_revoke.sh`

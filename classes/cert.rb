@@ -1,6 +1,7 @@
 require 'date'
 require 'zip'
 require 'i18n'
+require 'digest/sha1'
 require_relative 'runner'
 
 class CertManager
@@ -183,13 +184,13 @@ class CertManager
     if cert_item[:is_client]
       files_list << cert_item[:client]
       files_list << "#{@root_ca}/ca/client_certs/#{cert_item[:server_name]}/private/#{cert_item[:client_id]}_private.key.pem"
-      files_list << "#{@root_ca}/ca/intermediate/certs/ca-chain.cert.pem"
+      files_list << "#{@root_ca}/ca/#{cert_item[:server_name]}/certs/ca-chain.cert.pem"
       readme_txt = I18n.t('messages.client_readme', private_key: files_list[1], server_cert: files_list[0], ca_chain: files_list[2])
     else
       files_list << cert_item[:server]
-      files_list << "#{@root_ca}/ca/intermediate/private/#{cert_item[:server_name]}.key.pem"
-      files_list << "#{@root_ca}/ca/intermediate/certs/ca-chain.cert.pem"
-      files_list << "#{@root_ca}/ca/intermediate/crl/ca-full.crl.pem"
+      files_list << "#{@root_ca}/ca/#{cert_item[:server_name]}/private/#{cert_item[:server_name]}.key.pem"
+      files_list << "#{@root_ca}/ca/#{cert_item[:server_name]}/certs/ca-chain.cert.pem"
+      files_list << "#{@root_ca}/ca/#{cert_item[:server_name]}/crl/ca-full.crl.pem"
       readme_txt = I18n.t('messages.server_readme', private_key: files_list[1], server_cert: files_list[0], ca_chain: files_list[2], crl: files_list[3])
     end
     cert_info[:full] = readme_txt
@@ -210,7 +211,7 @@ class CertManager
 
     cert_info[:common] = cmd.stdout
 
-    cmd_args = %Q(openssl verify -crl_check_all -CAfile "#{@root_ca}/ca/intermediate/certs/ca-chain.cert.pem" -CRLfile "#{@root_ca}/ca/intermediate/crl/ca-full.crl.pem" "#{cert_path}" 2>&1)
+    cmd_args = %Q(openssl verify -crl_check_all -CAfile "#{@root_ca}/ca/#{cert_item[:server_name]}/certs/ca-chain.cert.pem" -CRLfile "#{@root_ca}/ca/#{cert_item[:server_name]}/crl/ca-full.crl.pem" "#{cert_path}" 2>&1)
     cmd = Runner.new(cmd_args)
     cmd.run_clean
     cert_info[:revoke] = cmd.stdout
@@ -259,13 +260,13 @@ class CertManager
       if cert_path[:is_client]
         files_list << cert_path[:client]
         files_list << "#{@root_ca}/ca/client_certs/#{cert_path[:server_name]}/private/#{cert_path[:client_id]}_private.key.pem"
-        files_list << "#{@root_ca}/ca/intermediate/certs/ca-chain.cert.pem"
+        files_list << "#{@root_ca}/ca/#{cert_path[:server_name]}/certs/ca-chain.cert.pem"
         readme_txt = I18n.t('messages.client_readme', private_key: File.basename(files_list[1]), server_cert: File.basename(files_list[0]), ca_chain: File.basename(files_list[2]))
       else
         files_list << cert_path[:server]
-        files_list << "#{@root_ca}/ca/intermediate/private/#{cert_path[:server_name]}.key.pem"
-        files_list << "#{@root_ca}/ca/intermediate/certs/ca-chain.cert.pem"
-        files_list << "#{@root_ca}/ca/intermediate/crl/ca-full.crl.pem"
+        files_list << "#{@root_ca}/ca/#{cert_path[:server_name]}/private/#{cert_path[:server_name]}.key.pem"
+        files_list << "#{@root_ca}/ca/#{cert_path[:server_name]}/certs/ca-chain.cert.pem"
+        files_list << "#{@root_ca}/ca/#{cert_path[:server_name]}/crl/ca-full.crl.pem"
         readme_txt = I18n.t('messages.server_readme', private_key: File.basename(files_list[1]), server_cert: File.basename(files_list[0]), ca_chain: File.basename(files_list[2]), crl: File.basename(files_list[3]))
       end
       if files_list.all? { |file| File.exist?(file) }
@@ -408,9 +409,9 @@ class CertManager
     end
     sr_name = item[:ui][:CN]
     serv_file = if cl_name.length > 1
-      "#{@root_ca}/ca/intermediate/certs/#{sr_name}.cert.pem.#{cl_name[1]}"
+      "#{@root_ca}/ca/#{sr_name}/certs/#{sr_name}.cert.pem.#{cl_name[1]}"
     else
-      "#{@root_ca}/ca/intermediate/certs/#{sr_name}.cert.pem"
+      "#{@root_ca}/ca/#{sr_name}/certs/#{sr_name}.cert.pem"
     end
     is_client = File.exist?(cert_file)
     seq = if cl_name.length > 1
@@ -428,13 +429,29 @@ class CertManager
       return []
     end
 
-    index_txt_path = "#{@root_ca}/ca/intermediate/index.txt"
+    index_txt_path = "#{@root_ca}/ca/server_certs"
     unless File.exist?(index_txt_path)
-      @error = I18n.t('errors.root_ca_not_detected')
       return []
     end
 
-    ca_index_txt = File.read(index_txt_path, encoding: 'utf-8').split("\n").each_with_object([]) do |line, entries|
+    # Retrieve names of subdirectories under index_txt_path (without nested dirs)
+    dir_names = Dir.children(index_txt_path).select do |entry|
+      File.directory?(File.join(index_txt_path, entry))
+    end
+
+    # Array to accumulate unique lines from all index.txt files
+    index_txt_entries = []
+
+    dir_names.each do |dir|
+      idx_file = File.join(@root_ca, 'ca', dir, 'index.txt')
+      next unless File.exist?(idx_file)
+      File.read(idx_file, encoding: 'utf-8').each_line do |line|
+        line.chomp!
+        index_txt_entries << line unless index_txt_entries.include?(line)
+      end
+    end
+
+    ca_index_txt = index_txt_entries.each_with_object([]) do |line, entries|
       match = line.split("\t")
       next if match.length != 6
 
@@ -472,6 +489,8 @@ class CertManager
       else
         "#{@root_ca}/ca/client_certs/#{prep[:ui][:CN]}/#{cl_name[0]}.cert.pem"
       end
+
+      prep[:id] = Digest::SHA1.hexdigest("#{prep[:ui][:CN]}/#{prep[:id]}")
 
       if type == '*'
         entries << prep

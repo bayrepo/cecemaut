@@ -24,5 +24,4 @@ fi
 
 PATH_TO_CA="$ROOT_DIR/ca"
 ROOT_CA="$PATH_TO_CA/root"
-IMM_CA="$PATH_TO_CA/intermediate"
 CLI_CA="$PATH_TO_CA/client_certs"
