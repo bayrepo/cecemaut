@@ -7,13 +7,6 @@
 
 source ./config.sh
 
-# Определяем, установлена ли русская локаль
-if [[ "${LANG,,}" == ru* ]] || [[ "${LC_MESSAGES,,}" == ru* ]]; then
-    LANG_RU=1
-else
-    LANG_RU=0
-fi
-
 # Detect language and define error function
 LANGUAGE="en"
 if [[ "$LANG" == ru* || "$LANG" == *ru_* || "$LC_ALL" == ru* || "$LC_ALL" == *ru_* ]]; then
@@ -33,7 +26,7 @@ msg() {
 
 # Handle -h option for help message
 if [ "$1" == "-h" ]; then
-    if [ "$LANG_RU" -eq 1 ]; then
+    if [ "$LANGUAGE" == "ru" ]; then
         echo "Использование: $0 [-h] [-t|--days DAYS] [domain1, domain2, ...]"
         echo "Создает сертификаты сервера для указанных доменов или IP."
         echo
@@ -60,7 +53,7 @@ while true; do
         break
         ;;
     -h | --help)
-        if [ "$LANG_RU" -eq 1 ]; then
+        if [ "$LANGUAGE" == "ru" ]; then
             echo "Использование: $0 [-h] [-t|--days DAYS] [domain1, domain2, ...]"
             echo "Создает сертификаты сервера для указанных доменов или IP."
             echo
@@ -88,12 +81,7 @@ pushd $PATH_TO_CA || exit
 
 # Проверка, предоставлен ли первый параметр и не пуст ли он
 if [ -z "$1" ]; then
-    if [ "$LANG_RU" -eq 1 ]; then
-        echo "Нет входных данных"
-    else
-        echo "No input provided"
-    fi
-    exit 0
+    msg "No input provided" "Нет входных данных"
 fi
 
 # Разделение входной строки в массив с использованием запятых или пробелов как разделителей
@@ -101,13 +89,8 @@ IFS=', ' read -r -a items <<<"$1"
 
 # Проверка, есть ли хотя бы один элемент в списке
 if [ "${#items[@]}" -eq 0 ]; then
-    if [ "$LANG_RU" -eq 1 ]; then
-        echo "Входные данные пусты"
-    else
-        echo "No elements found in the input"
-    fi
+    msg "No elements found in the input" "Входные данные пусты"
     popd || exit
-    exit 0
 fi
 
 SEQ="1"
@@ -215,25 +198,25 @@ authorityKeyIdentifier = keyid:always
 EOL
 
     # Перейти в директорию промежуточного ЦА или выйти с ошибкой, если это не удалось
-    pushd "$IMM_CA" || { msg "Error: Failed to change directory to $IMM_CA" "Ошибка: Не удалось перейти в каталог $IMM_CA"; }
+    pushd "$IMM_CA" || msg "Error: Failed to change directory to $IMM_CA" "Ошибка: Не удалось перейти в каталог $IMM_CA"
 
     # Генерация RSA ключа для промежуточного ЦА с шифрованием AES-256
-    openssl genrsa -aes256 -out private/intermediate.key.pem -passout "pass:$SERT_PASS" 4096 || { msg "Error: Failed to generate RSA key for intermediate CA" "Ошибка: Не удалось создать RSA‑ключ для промежуточного ЦА"; }
+    openssl genrsa -aes256 -out private/intermediate.key.pem -passout "pass:$SERT_PASS" 4096 || msg "Error: Failed to generate RSA key for intermediate CA" "Ошибка: Не удалось создать RSA‑ключ для промежуточного ЦА"
 
     # Установка прав доступа для ключа промежуточного ЦА
     chmod 400 private/intermediate.key.pem
 
     # Создание CSR для промежуточного ЦА
-    openssl req -config immissuer.conf -new -sha256 -key private/intermediate.key.pem -out csr/intermediate.csr.pem -passin "pass:$SERT_PASS" || { msg "Error: Failed to create CSR for intermediate CA" "Ошибка: Не удалось создать запрос на сертификат для промежуточного ЦА"; }
+    openssl req -config immissuer.conf -new -sha256 -key private/intermediate.key.pem -out csr/intermediate.csr.pem -passin "pass:$SERT_PASS" || msg "Error: Failed to create CSR for intermediate CA" "Ошибка: Не удалось создать запрос на сертификат для промежуточного ЦА"
 
     # Вернуться в исходную директорию или выйти с ошибкой, если это не удалось
-    popd || { msg "Can't return to old directory" "Невозможно вернуться к старому каталогу"; }
+    popd || msg "Can't return to old directory" "Невозможно вернуться к старому каталогу"
 
     # Перейти в директорию корневого ЦА или выйти с ошибкой, если это не удалось
-    pushd "$ROOT_CA" || { msg "Error: Failed to change directory to $ROOT_CA" "Ошибка: Не удалось перейти в каталог $ROOT_CA"; }
+    pushd "$ROOT_CA" || msg "Error: Failed to change directory to $ROOT_CA" "Ошибка: Не удалось перейти в каталог $ROOT_CA"
 
     # Подпись сертификата промежуточного ЦА корневым ЦА
-    openssl ca -batch -config sertissuer.conf -extensions v3_inter -days 3550 -notext -md sha256 -in $IMM_CA/csr/intermediate.csr.pem -out $IMM_CA/certs/intermediate.cert.pem -passin "pass:$SERT_PASS" || { msg "Error: Failed to sign intermediate CA certificate" "Ошибка: Не удалось подписать сертификат промежуточного ЦА корневым ЦА"; }
+    openssl ca -batch -config sertissuer.conf -extensions v3_inter -days 3550 -notext -md sha256 -in $IMM_CA/csr/intermediate.csr.pem -out $IMM_CA/certs/intermediate.cert.pem -passin "pass:$SERT_PASS" || msg "Error: Failed to sign intermediate CA certificate" "Ошибка: Не удалось подписать сертификат промежуточного ЦА корневым ЦА"
 
     # Установка прав доступа для сертификата промежуточного ЦА
     chmod 444 "$IMM_CA/certs/intermediate.cert.pem"
@@ -241,24 +224,23 @@ EOL
     openssl ca -config "sertissuer.conf" -gencrl -out crl/ca.crl.pem -passin "pass:$SERT_PASS"
 
     # Вернуться в исходную директорию или выйти с ошибкой, если это не удалось
-    popd || { msg "Can't return to old directory" "Невозможно вернуться к старому каталогу"; }
+    popd || msg "Can't return to old directory" "Невозможно вернуться к старому каталогу"
 
     # Перейти в директорию промежуточного ЦА или выйти с ошибкой, если это не удалось
-    pushd "$IMM_CA" || { msg "Error: Failed to change directory to $IMM_CA" "Ошибка: Не удалось перейти в каталог $IMM_CA"; }
+    pushd "$IMM_CA" || msg "Error: Failed to change directory to $IMM_CA" "Ошибка: Не удалось перейти в каталог $IMM_CA"
 
     openssl ca -config "immissuer.conf" -gencrl -out crl/intermediate.crl.pem -passin "pass:$SERT_PASS"
 
     cat $ROOT_CA/crl/ca.crl.pem "$IMM_CA/crl/intermediate.crl.pem" >"$IMM_CA/crl/ca-full.crl.pem"
 
     # Вернуться в исходную директорию или выйти с ошибкой, если это не удалось
-    popd || { msg "Can't return to old directory" "Невозможно вернуться к старому каталогу"; }
+    popd || msg "Can't return to old directory" "Невозможно вернуться к старому каталогу"
 
     # Создание цепочки сертификатов
-    cat "$IMM_CA/certs/intermediate.cert.pem" "$ROOT_CA/certs/ca.cert.pem" >"$IMM_CA/certs/ca-chain.cert.pem" || { msg "Error: Failed to create CA chain certificate" "Ошибка: Не удалось создать цепочку сертификатов ЦА"; }
+    cat "$IMM_CA/certs/intermediate.cert.pem" "$ROOT_CA/certs/ca.cert.pem" >"$IMM_CA/certs/ca-chain.cert.pem" || msg "Error: Failed to create CA chain certificate" "Ошибка: Не удалось создать цепочку сертификатов ЦА"
 
     # Проверка сертификата промежуточного ЦА с использованием корневого центра сертификации
-    openssl verify -CAfile "$ROOT_CA/certs/ca.cert.pem" "$IMM_CA/certs/intermediate.cert.pem" || { msg "Error: Failed to verify intermediate CA certificate" "Ошибка: Не удалось проверить сертификат промежуточного ЦА"; }
-
+    openssl verify -CAfile "$ROOT_CA/certs/ca.cert.pem" "$IMM_CA/certs/intermediate.cert.pem" || msg "Error: Failed to verify intermediate CA certificate" "Ошибка: Не удалось проверить сертификат промежуточного ЦА"
 fi
 # Конец создания промежуточного CA
 
@@ -308,14 +290,7 @@ EOF
 
     popd || exit
 
-    pushd "$IMM_CA" || {
-        if [ "$LANG_RU" -eq 1 ]; then
-            echo "Ошибка: не удалось перейти в каталог $IMM_CA"
-        else
-            echo "Error: Could not change directory to $IMM_CA"
-        fi
-        exit 1
-    }
+    pushd "$IMM_CA" || msg "Error: Could not change directory to $IMM_CA" "Ошибка: не удалось перейти в каталог $IMM_CA"
 
     openssl genrsa -out "private/$fst_elem.key.pem" -passout "pass:$SERT_PASS" 2048
     chmod 400 "private/$fst_elem.key.pem"
@@ -325,14 +300,7 @@ else
 
     sed -i "s/^O = .*/O = ${ORG_NAME}:${SEQ}/" "${fst_elem}/csr_req.cnf"
 
-    pushd "$IMM_CA" || {
-        if [ "$LANG_RU" -eq 1 ]; then
-            echo "Ошибка: не удалось перейти в каталог $IMM_CA"
-        else
-            echo "Error: Could not change directory to $IMM_CA"
-        fi
-        exit 1
-    }
+    pushd "$IMM_CA" || msg "Error: Could not change directory to $IMM_CA" "Ошибка: не удалось перейти в каталог $IMM_CA"
 
 fi
 
@@ -347,7 +315,7 @@ chmod 444 "certs/$fst_elem.cert.pem.$SEQ"
 openssl x509 -noout -text -in "certs/$fst_elem.cert.pem.$SEQ"
 
 # Информирование пользователя о сгенерированных ключах и сертификатах
-if [ "$LANG_RU" -eq 1 ]; then
+if [ "$LANGUAGE" == "ru" ]; then
     cat <<EOF
 Сгенерированный набор ключей для установки на сервер:
 

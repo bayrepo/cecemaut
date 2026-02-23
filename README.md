@@ -18,7 +18,7 @@
 
 В данном случае не требуется установка ruby и прочих пакетов, кроме openssl и bash. Для управления используются только скрипты
 
-- `git clone https://dev.brepo.ru/brepo/cecemaut.git`
+- `git clone https://github.com/bayrepo/cecemaut.git`
 - `cd cecemait`
 - `cd utils`
 - создайте файл `custom_config.sh`  с содержимым:
@@ -58,7 +58,7 @@ gpgcheck=1" > /etc/yum.repos.d/brepo_projects.repo
 - устанавливаем пакет: `sudo yum install alt-brepo-ruby33 alt-brepo-ruby33-devel`
 - подключаем репозиторий crb: `sudo dnf config-manager --set-enabled crb`
 - доустанавливаем пакеты, необходимые для работы программы: `sudo yum install -y curl git gnupg2 gcc gcc-c++ patch readline-devel zlib-devel libyaml-devel libffi-devel openssl-devel ruby ruby-devel`
-- `git clone https://dev.brepo.ru/brepo/cecemaut.git`
+- `git clone https://github.com/bayrepo/cecemaut.git`
 - `cd cecemait`
 - выполните команду для создания ключей приложения: `bash utils/make_app_keys.sh .`
 - выполните команду для установки необходимых гемов (все ставится в локальный каталог): `/opt/brepo/ruby33/bin/bundle install`
@@ -91,7 +91,7 @@ IPBIND = '127.0.0.1'
 Для создания и запуска образа docker необходимо выполнить следующее:
 
 - установить сам докер
-- `git clone https://dev.brepo.ru/brepo/cecemaut.git`
+- `git clone https://github.com/bayrepo/cecemaut.git`
 - `cd cecemait`
 - файлы конфигурации находятся в файле `classes/config.rb`, но если нужно что-то переопределить, например на какой IP адрес приложению прицепиться или количество записей на странице или прочее, то рекомендуетя создать файл `classes/config_custom.rb`, где можно переопределить стандартные значения констант:
 
